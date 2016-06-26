@@ -41,16 +41,21 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
+    private static int BT_ENABLE = 1;
+
     private SensorManager sensorManager;
     private Sensor sensorAccelerometer;
     private BluetoothAdapter bluetoothAdapter;
+
+    private TextView xText;
+    private TextView yText;
+    private TextView zText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +63,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        // Get UI elements
+        xText = (TextView)findViewById(R.id.x_tv);
+        yText = (TextView)findViewById(R.id.y_tv);
+        zText = (TextView)findViewById(R.id.z_tv);
 
         // Sensors initialization
         sensorManager = (SensorManager) getSystemService(getApplicationContext().SENSOR_SERVICE);
@@ -67,16 +77,31 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // Bluetooth initialization
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null) {
-            Snackbar.make(findViewById(R.id.main_view), "Bluetooth not supported!", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
-        }
-        else {
+            notifyBySnackbar("Bluetooth not supported!");
+        } else {
             // Enable bluetooth
-            if (!bluetoothAdapter.isEnabled()) {
-                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableBtIntent, 0);
+            if (!bluetoothAdapter.isEnabled())
+                enableBluetooth();
+        }
+    }
+
+    private void enableBluetooth()
+    {
+        if (!bluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, BT_ENABLE);
+        }
+    }
+
+    @Override
+    protected void onActivityResult (int requestCode, int resultCode, Intent data)
+    {
+        if (requestCode == BT_ENABLE) {
+            if (resultCode == RESULT_OK) {
+                showPairedDevices();
+            } else if (resultCode == RESULT_CANCELED) {
+                notifyBySnackbar("User cancelled the action!");
             }
-            showPairedDevices();
         }
     }
 
@@ -94,20 +119,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_enable_bluetooth) {
+            enableBluetooth();
             return true;
         }
 
@@ -135,13 +156,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             float y = event.values[1];
             float z = event.values[2];
             
-            TextView xText = (TextView)findViewById(R.id.x_tv);
             xText.setText(Float.toString(x));
-
-            TextView yText = (TextView)findViewById(R.id.y_tv);
             yText.setText(Float.toString(y));
-
-            TextView zText = (TextView)findViewById(R.id.z_tv);
             zText.setText(Float.toString(z));
         }
     }
@@ -149,5 +165,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
+    }
+
+    public void notifyBySnackbar(String message)
+    {
+        Snackbar.make(findViewById(R.id.main_view), message, Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
     }
 }
