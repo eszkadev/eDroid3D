@@ -47,7 +47,7 @@ import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
-    private static int BT_ENABLE = 1;
+    private final int BT_ENABLE = 1;
 
     private SensorManager sensorManager;
     private Sensor sensorAccelerometer;
@@ -56,6 +56,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView xText;
     private TextView yText;
     private TextView zText;
+
+    private ServerThread thread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,11 +79,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // Bluetooth initialization
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null) {
-            notifyBySnackbar("Bluetooth not supported!");
+            updateStatus("Bluetooth not supported!");
         } else {
             // Enable bluetooth
             if (!bluetoothAdapter.isEnabled())
                 enableBluetooth();
+            else
+                startBluetoothServer();
         }
     }
 
@@ -93,15 +97,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
+    private void startBluetoothServer()
+    {
+        showPairedDevices();
+        thread = new ServerThread(this, bluetoothAdapter);
+        thread.start();
+    }
+
     @Override
     protected void onActivityResult (int requestCode, int resultCode, Intent data)
     {
         if (requestCode == BT_ENABLE) {
-            if (resultCode == RESULT_OK) {
-                showPairedDevices();
-            } else if (resultCode == RESULT_CANCELED) {
-                notifyBySnackbar("User cancelled the action!");
-            }
+            if (resultCode == RESULT_OK)
+                startBluetoothServer();
+            else if (resultCode == RESULT_CANCELED)
+                updateStatus("User cancelled the action!");
         }
     }
 
@@ -167,9 +177,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     }
 
-    public void notifyBySnackbar(String message)
+    public void updateStatus(String message)
     {
         Snackbar.make(findViewById(R.id.main_view), message, Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show();
     }
+
 }
