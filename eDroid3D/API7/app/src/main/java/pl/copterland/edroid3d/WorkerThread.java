@@ -29,69 +29,67 @@
 package pl.copterland.edroid3d;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 
 import java.io.IOException;
-import java.util.UUID;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-public class ServerThread extends Thread {
-    private final BluetoothServerSocket serverSocket;
-    private final String APP_NAME = "copterland";
-    private final String RFCOMM_UUID = "00001101-0000-1000-8000-00805F9B34FB";
+public class WorkerThread extends Thread {
+    private final BluetoothSocket socket;
+    private final InputStream inStream;
+    private final OutputStream outStream;
     private Activity parentActivity;
-    private WorkerThread thread;
 
-    public ServerThread(Activity parent, BluetoothAdapter adapter) {
-        // Use a temporary object that is later assigned to mmServerSocket,
-        // because serverSocket is final
-        BluetoothServerSocket tmp = null;
-        try {
-            tmp = adapter.listenUsingRfcommWithServiceRecord(APP_NAME, UUID.fromString(RFCOMM_UUID));
-        } catch (IOException e) { }
-        serverSocket = tmp;
+    public WorkerThread(Activity parent, BluetoothSocket clientSocket) {
+        socket = clientSocket;
+        InputStream tmpIn = null;
+        OutputStream tmpOut = null;
         parentActivity = parent;
+
+        // Get the input and output streams, using temp objects because
+        // member streams are final
+        try {
+            tmpIn = socket.getInputStream();
+            tmpOut = socket.getOutputStream();
+        } catch (IOException e) { }
+
+        inStream = tmpIn;
+        outStream = tmpOut;
     }
 
     public void run() {
-        BluetoothSocket socket = null;
-        // Keep listening until exception occurs or a socket is returned
+        final byte[] buffer = new byte[1024];
+        int bytes;
+
+        // Keep listening to the InputStream until an exception occurs
         while (true) {
             try {
-                updateUI("Wait for client...");
-                socket = serverSocket.accept();
+                // echo
+                bytes = inStream.read(buffer);
+                outStream.write(buffer, 0, bytes);
+
+                parentActivity.runOnUiThread(new Runnable() {
+                    public void run() {
+                        ((MainActivity)parentActivity).updateStatus(new String(buffer));
+                    }
+                });
             } catch (IOException e) {
-                break;
-            }
-            // If a connection was accepted
-            if (socket != null) {
-                updateUI("Connected");
-                thread = new WorkerThread(parentActivity, socket);
-                thread.start();
-                try {
-                    serverSocket.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
                 break;
             }
         }
     }
 
-    private void updateUI(final String message)
-    {
-        parentActivity.runOnUiThread(new Runnable() {
-            public void run() {
-                ((MainActivity)parentActivity).updateStatus(message);
-            }
-        });
+    public void write(byte[] bytes) {
+        try {
+            outStream.write(bytes);
+        } catch (IOException e) { }
     }
 
     public void cancel() {
         try {
-            thread.cancel();
-            serverSocket.close();
+            socket.close();
         } catch (IOException e) { }
     }
+
 }
