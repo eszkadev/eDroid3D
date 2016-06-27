@@ -58,6 +58,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView zText;
 
     private ServerThread thread;
+    private WorkerThread worker;
+
+    private Frame frame;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +68,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        frame = new Frame();
+        worker = null;
 
         // Get UI elements
         xText = (TextView)findViewById(R.id.x_tv);
@@ -169,7 +175,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             xText.setText(Float.toString(x));
             yText.setText(Float.toString(y));
             zText.setText(Float.toString(z));
+
+            float range = mySensor.getMaximumRange();
+            frame.setFrameNumber((byte)((int)frame.getFrameNumber() + 1));
+            frame.setAccelerometer((byte)(x/range*127), (byte)(y/range*127), (byte)(z/range*127));
+
+            if (worker != null)
+                worker.write(frame.getData());
         }
+    }
+
+    public void setWorker(WorkerThread thread)
+    {
+        worker = thread;
     }
 
     @Override

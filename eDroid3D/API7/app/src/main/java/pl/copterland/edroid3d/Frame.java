@@ -32,9 +32,11 @@ public class Frame {
         return data[Offset.FRAME_NO];
     }
 
-    public void setAccelerometerX(byte x)
+    public void setAccelerometer(byte x, byte y, byte z)
     {
         data[Offset.PALM_X] = x;
+        data[Offset.PALM_Y] = y;
+        data[Offset.PALM_Z] = z;
     }
 
     private class Offset

@@ -69,6 +69,13 @@ public class ServerThread extends Thread {
                 updateUI("Connected");
                 thread = new WorkerThread(parentActivity, socket);
                 thread.start();
+
+                parentActivity.runOnUiThread(new Runnable() {
+                    public void run() {
+                        ((MainActivity)parentActivity).setWorker(thread);
+                    }
+                });
+
                 try {
                     serverSocket.close();
                 } catch (IOException e) {

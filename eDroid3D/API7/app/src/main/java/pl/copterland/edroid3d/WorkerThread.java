@@ -40,14 +40,12 @@ public class WorkerThread extends Thread {
     private final InputStream inStream;
     private final OutputStream outStream;
     private Activity parentActivity;
-    private Frame frame;
 
     public WorkerThread(Activity parent, BluetoothSocket clientSocket) {
         socket = clientSocket;
         InputStream tmpIn = null;
         OutputStream tmpOut = null;
         parentActivity = parent;
-        frame = new Frame();
 
         // Get the input and output streams, using temp objects because
         // member streams are final
@@ -67,13 +65,7 @@ public class WorkerThread extends Thread {
         // Keep listening to the InputStream until an exception occurs
         while (true) {
             try {
-                // TODO: non-blocking read
-                //bytes = inStream.read(buffer);
-
-                frame.setFrameNumber((byte)((int)frame.getFrameNumber() + 1));
-                frame.setAccelerometerX((byte)(100 - frame.getFrameNumber()));
-
-                outStream.write(frame.getData(), 0, Frame.FRAME_SIZE);
+                bytes = inStream.read(buffer);
 
                 parentActivity.runOnUiThread(new Runnable() {
                     public void run() {
