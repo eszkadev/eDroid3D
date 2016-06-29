@@ -28,7 +28,7 @@
                 android:text="Accelerometer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/akcelerometer_text_view"
+                android:id="@+id/accelerometer_text_view"
                 android:layout_column="0" />
         </TableRow>
 
