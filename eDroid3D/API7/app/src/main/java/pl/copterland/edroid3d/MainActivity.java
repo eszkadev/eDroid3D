@@ -62,12 +62,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private Frame frame;
 
+    private enum State {
+        Stopped,
+        Running
+    }
+
+    private State state;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        state = State.Stopped;
 
         frame = new Frame();
         worker = null;
@@ -180,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             frame.setFrameNumber((byte)((int)frame.getFrameNumber() + 1));
             frame.setAccelerometer((byte)(x/range*127), (byte)(y/range*127), (byte)(z/range*127));
 
-            if (worker != null)
+            if (worker != null && state == State.Running)
                 worker.write(frame.getData());
         }
     }
@@ -201,4 +210,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 .setAction("Action", null).show();
     }
 
+    public void executeCommand(String command)
+    {
+        if(command.length() > 0) {
+            if (command.charAt(0) == 'R') {
+                state = State.Running;
+                updateStatus("Started");
+            } else if (command.charAt(0) == 'S') {
+                state = State.Stopped;
+                updateStatus("Stopped");
+            }
+        }
+    }
 }

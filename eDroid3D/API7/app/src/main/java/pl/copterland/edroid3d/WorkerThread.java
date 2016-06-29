@@ -69,7 +69,7 @@ public class WorkerThread extends Thread {
 
                 parentActivity.runOnUiThread(new Runnable() {
                     public void run() {
-                        ((MainActivity)parentActivity).updateStatus(new String(buffer));
+                        ((MainActivity)parentActivity).executeCommand(new String(buffer));
                     }
                 });
             } catch (IOException e) {
