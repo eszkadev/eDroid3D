@@ -38,13 +38,13 @@ import java.util.UUID;
 
 public class ServerThread extends Thread {
     private final BluetoothServerSocket serverSocket;
-    private final String APP_NAME = "copterland";
-    private final String RFCOMM_UUID = "00001101-0000-1000-8000-00805F9B34FB";
+    private final static String APP_NAME = "copterland";
+    private final static String RFCOMM_UUID = "00001101-0000-1000-8000-00805F9B34FB";
     private Activity parentActivity;
     private WorkerThread thread;
 
     public ServerThread(Activity parent, BluetoothAdapter adapter) {
-        // Use a temporary object that is later assigned to mmServerSocket,
+        // Use a temporary object that is later assigned to serverSocket,
         // because serverSocket is final
         BluetoothServerSocket tmp = null;
         try {

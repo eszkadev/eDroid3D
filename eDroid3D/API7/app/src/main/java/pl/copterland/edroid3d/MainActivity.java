@@ -47,15 +47,15 @@ import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
-    private final int BT_ENABLE = 1;
+    private final static int BLUETOOTH_ENABLE_REQUEST = 1;
 
     private SensorManager sensorManager;
     private Sensor sensorAccelerometer;
     private BluetoothAdapter bluetoothAdapter;
 
-    private TextView xText;
-    private TextView yText;
-    private TextView zText;
+    private TextView xTextView;
+    private TextView yTextView;
+    private TextView zTextView;
 
     private ServerThread thread;
     private WorkerThread worker;
@@ -73,9 +73,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         worker = null;
 
         // Get UI elements
-        xText = (TextView)findViewById(R.id.x_tv);
-        yText = (TextView)findViewById(R.id.y_tv);
-        zText = (TextView)findViewById(R.id.z_tv);
+        xTextView = (TextView)findViewById(R.id.x_text_view);
+        yTextView = (TextView)findViewById(R.id.y_text_view);
+        zTextView = (TextView)findViewById(R.id.z_text_view);
 
         // Sensors initialization
         sensorManager = (SensorManager) getSystemService(getApplicationContext().SENSOR_SERVICE);
@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     {
         if (!bluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, BT_ENABLE);
+            startActivityForResult(enableBtIntent, BLUETOOTH_ENABLE_REQUEST);
         }
     }
 
@@ -111,9 +111,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     @Override
-    protected void onActivityResult (int requestCode, int resultCode, Intent data)
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        if (requestCode == BT_ENABLE) {
+        if (requestCode == BLUETOOTH_ENABLE_REQUEST) {
             if (resultCode == RESULT_OK)
                 startBluetoothServer();
             else if (resultCode == RESULT_CANCELED)
@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         if (pairedDevices.size() > 0) {
             for (BluetoothDevice device : pairedDevices) {
-                TextView devicesEditText = (TextView)findViewById(R.id.paired_devices_tv);
+                TextView devicesEditText = (TextView)findViewById(R.id.paired_devices_text_view);
                 devicesEditText.setText(devicesEditText.getText() + device.getName() + "\n" + device.getAddress() + "\n");
             }
         }
@@ -172,9 +172,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             float y = event.values[1];
             float z = event.values[2];
             
-            xText.setText(Float.toString(x));
-            yText.setText(Float.toString(y));
-            zText.setText(Float.toString(z));
+            xTextView.setText(Float.toString(x));
+            yTextView.setText(Float.toString(y));
+            zTextView.setText(Float.toString(z));
 
             float range = mySensor.getMaximumRange();
             frame.setFrameNumber((byte)((int)frame.getFrameNumber() + 1));
