@@ -207,15 +207,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     public void executeCommand(String command)
     {
-        if(command.length() > 0) {
-            if (command.charAt(0) == 'R') {
+        for(char c : command.toCharArray()) {
+            if (c == 'R') {
                 state = State.Running;
                 updateStatus("Started");
-            } else if (command.charAt(0) == 'S') {
+            } else if (c == 'S') {
                 state = State.Stopped;
                 updateStatus("Stopped");
-            } else {
-                updateStatus("Unsupported: \'" + command + "\'");
+            } else if (c != 0){
+                updateStatus("Unsupported: \'" + c + "\'");
             }
         }
     }

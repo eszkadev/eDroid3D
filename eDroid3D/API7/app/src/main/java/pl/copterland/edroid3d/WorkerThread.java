@@ -59,7 +59,7 @@ public class WorkerThread extends Thread {
     }
 
     public void run() {
-        final byte[] buffer = new byte[1024];
+        final byte[] buffer = new byte[8];
         int bytes;
 
         // Keep listening to the InputStream until an exception occurs
