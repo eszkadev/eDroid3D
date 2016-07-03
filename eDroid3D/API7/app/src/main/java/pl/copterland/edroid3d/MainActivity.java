@@ -62,7 +62,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private Frame frame;
 
-    private enum State {
+    public enum State {
+        WaitForClient,
         Stopped,
         Running
     }
@@ -76,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        state = State.Stopped;
+        state = State.WaitForClient;
 
         frame = new Frame();
         worker = null;
@@ -114,7 +115,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private void startBluetoothServer()
     {
-        showPairedDevices();
         thread = new ServerThread(this, bluetoothAdapter);
         thread.start();
     }
@@ -127,18 +127,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 startBluetoothServer();
             else if (resultCode == RESULT_CANCELED)
                 updateStatus("User cancelled the action!");
-        }
-    }
-
-    private void showPairedDevices()
-    {
-        Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
-
-        if (pairedDevices.size() > 0) {
-            for (BluetoothDevice device : pairedDevices) {
-                TextView devicesEditText = (TextView)findViewById(R.id.paired_devices_text_view);
-                devicesEditText.setText(devicesEditText.getText() + device.getName() + "\n" + device.getAddress() + "\n");
-            }
         }
     }
 
@@ -197,6 +185,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void setWorker(WorkerThread thread)
     {
         worker = thread;
+        state = State.Stopped;
+    }
+
+    public void onWorkerFinished()
+    {
+        state = State.WaitForClient;
+        startBluetoothServer();
     }
 
     @Override
@@ -219,6 +214,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             } else if (command.charAt(0) == 'S') {
                 state = State.Stopped;
                 updateStatus("Stopped");
+            } else {
+                updateStatus("Unsupported: \'" + command + "\'");
             }
         }
     }

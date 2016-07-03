@@ -73,6 +73,7 @@ public class WorkerThread extends Thread {
                     }
                 });
             } catch (IOException e) {
+                cancel();
                 break;
             }
         }
@@ -81,13 +82,21 @@ public class WorkerThread extends Thread {
     public void write(byte[] bytes) {
         try {
             outStream.write(bytes);
-        } catch (IOException e) { }
+        } catch (IOException e) {
+            cancel();
+        }
     }
 
     public void cancel() {
         try {
             socket.close();
         } catch (IOException e) { }
+
+        parentActivity.runOnUiThread(new Runnable() {
+            public void run() {
+                ((MainActivity)parentActivity).onWorkerFinished();
+            }
+        });
     }
 
 }
