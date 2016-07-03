@@ -64,6 +64,21 @@ public class Frame {
         data[Offset.PALM_Z] = z;
     }
 
+    public byte getAccelerometerX()
+    {
+        return data[Offset.PALM_X];
+    }
+
+    public byte getAccelerometerY()
+    {
+        return data[Offset.PALM_Y];
+    }
+
+    public byte getAccelerometerZ()
+    {
+        return data[Offset.PALM_Z];
+    }
+
     private class Offset
     {
         public static final int FRAME_NO = 0;

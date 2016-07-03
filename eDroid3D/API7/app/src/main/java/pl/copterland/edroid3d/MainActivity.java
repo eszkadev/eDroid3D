@@ -41,7 +41,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.widget.TextView;
-import java.lang.Math;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -58,7 +57,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private ServerThread thread;
     private WorkerThread worker;
 
-    private Frame frame;
+    private final static int FRAMES_MAX_SIZE = 128;
+    private Frame[] frames;
+    private Frame averagedFrame;
+    private int currentFrame = 0;
 
     private enum State {
         WaitForClient,
@@ -79,7 +81,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         state = State.WaitForClient;
         averageSamplesAmount = 2;
 
-        frame = new Frame();
+        frames = new Frame[FRAMES_MAX_SIZE];
+        for(int i = 0; i < FRAMES_MAX_SIZE; i++)
+            frames[i] = new Frame();
+
+        averagedFrame = new Frame();
         worker = null;
 
         // Get UI elements
@@ -174,12 +180,37 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             zTextView.setText(Float.toString(z));
 
             float range = mySensor.getMaximumRange();
-            frame.setFrameNumber((byte)((int)frame.getFrameNumber() + 1));
-            frame.setAccelerometer((byte)(x/range*127), (byte)(y/range*127), (byte)(z/range*127));
+            frames[currentFrame].setAccelerometer((byte)(x/range*127), (byte)(y/range*127), (byte)(z/range*127));
 
-            if (worker != null && state == State.Running)
-                worker.write(frame.getData());
+            currentFrame++;
+            if (currentFrame >= averageSamplesAmount)
+                currentFrame = 0;
+
+            if (worker != null && state == State.Running) {
+                averageFrame();
+                averagedFrame.setFrameNumber((byte)((int)averagedFrame.getFrameNumber() + 1));
+                worker.write(averagedFrame.getData());
+            }
         }
+    }
+
+    private void averageFrame() {
+        int aX = 0;
+        int aY = 0;
+        int aZ = 0;
+
+        for(int i = 0; i < averageSamplesAmount; i++)
+        {
+            aX += frames[i].getAccelerometerX();
+            aY += frames[i].getAccelerometerY();
+            aZ += frames[i].getAccelerometerZ();
+        }
+
+        aX = aX / averageSamplesAmount;
+        aY = aY / averageSamplesAmount;
+        aZ = aZ / averageSamplesAmount;
+
+        averagedFrame.setAccelerometer((byte)aX, (byte)aY, (byte)aZ);
     }
 
     public void setWorker(WorkerThread thread)
