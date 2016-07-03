@@ -29,7 +29,6 @@
 package pl.copterland.edroid3d;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -42,8 +41,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.widget.TextView;
-
-import java.util.Set;
+import java.lang.Math;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -62,13 +60,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private Frame frame;
 
-    public enum State {
+    private enum State {
         WaitForClient,
         Stopped,
         Running
     }
 
     private State state;
+    private int averageSamplesAmount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setSupportActionBar(toolbar);
 
         state = State.WaitForClient;
+        averageSamplesAmount = 2;
 
         frame = new Frame();
         worker = null;
@@ -208,14 +208,32 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void executeCommand(String command)
     {
         for(char c : command.toCharArray()) {
-            if (c == 'R') {
-                state = State.Running;
-                updateStatus("Started");
-            } else if (c == 'S') {
-                state = State.Stopped;
-                updateStatus("Stopped");
-            } else if (c != 0){
-                updateStatus("Unsupported: \'" + c + "\'");
+            switch(c) {
+                case 'R':
+                    state = State.Running;
+                    updateStatus("Started");
+                    break;
+
+                case 'S':
+                    state = State.Stopped;
+                    updateStatus("Stopped");
+                    break;
+
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                    averageSamplesAmount = (int)java.lang.Math.pow(2, (c - '0'));
+                    updateStatus("Averaged samples: " + averageSamplesAmount);
+                    break;
+
+                default:
+                    if (c != 0) {
+                        updateStatus("Unsupported: \'" + c + "\'");
+                    }
             }
         }
     }
