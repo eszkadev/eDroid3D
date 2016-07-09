@@ -116,7 +116,7 @@
             <TextView
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="X:"
-                android:id="@+id/x_mag_label_text_view"
+                android:id="@+id/x_magnetometer_label_text_view"
                 android:layout_column="0" />
 
             <TextView
@@ -124,7 +124,7 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="0"
-                android:id="@+id/x_mag_text_view"
+                android:id="@+id/x_magnetometer_text_view"
                 android:layout_column="1" />
         </TableRow>
 
@@ -135,7 +135,7 @@
             <TextView
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="Y:"
-                android:id="@+id/y_mag_label_text_view"
+                android:id="@+id/y_magnetometer_label_text_view"
                 android:layout_column="0" />
 
             <TextView
@@ -143,7 +143,7 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="0"
-                android:id="@+id/y_mag_text_view"
+                android:id="@+id/y_magnetometer_text_view"
                 android:layout_column="1" />
         </TableRow>
 
@@ -154,7 +154,7 @@
             <TextView
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="Z:"
-                android:id="@+id/z_mag_label_text_view"
+                android:id="@+id/z_magnetometer_label_text_view"
                 android:layout_column="0" />
 
             <TextView
@@ -162,7 +162,7 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="0"
-                android:id="@+id/z_mag_text_view"
+                android:id="@+id/z_magnetometer_text_view"
                 android:layout_column="1" />
         </TableRow>
 

@@ -116,9 +116,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         xTextView = (TextView)findViewById(R.id.x_text_view);
         yTextView = (TextView)findViewById(R.id.y_text_view);
         zTextView = (TextView)findViewById(R.id.z_text_view);
-        xMagTextView = (TextView)findViewById(R.id.x_mag_text_view);
-        yMagTextView = (TextView)findViewById(R.id.y_mag_text_view);
-        zMagTextView = (TextView)findViewById(R.id.z_mag_text_view);
+        xMagTextView = (TextView)findViewById(R.id.x_magnetometer_text_view);
+        yMagTextView = (TextView)findViewById(R.id.y_magnetometer_text_view);
+        zMagTextView = (TextView)findViewById(R.id.z_magnetometer_text_view);
 
         // Sensors initialization
         sensorManager = (SensorManager) getSystemService(getApplicationContext().SENSOR_SERVICE);
