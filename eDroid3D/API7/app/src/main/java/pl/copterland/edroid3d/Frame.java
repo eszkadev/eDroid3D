@@ -64,6 +64,13 @@ public class Frame {
         data[Offset.PALM_Z] = z;
     }
 
+    public void setMagnetometer(byte x, byte y, byte z)
+    {
+        data[Offset.MAGNETOMETER_X] = x;
+        data[Offset.MAGNETOMETER_Y] = y;
+        data[Offset.MAGNETOMETER_Z] = z;
+    }
+
     public byte getAccelerometerX()
     {
         return data[Offset.PALM_X];
@@ -77,6 +84,21 @@ public class Frame {
     public byte getAccelerometerZ()
     {
         return data[Offset.PALM_Z];
+    }
+
+    public byte getMagnetometerX()
+    {
+        return data[Offset.MAGNETOMETER_X];
+    }
+
+    public byte getMagnetometerY()
+    {
+        return data[Offset.MAGNETOMETER_Y];
+    }
+
+    public byte getMagnetometerZ()
+    {
+        return data[Offset.MAGNETOMETER_Z];
     }
 
     private class Offset

@@ -49,11 +49,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private SensorManager sensorManager;
     private Sensor sensorAccelerometer;
+    private Sensor sensorMagnetometer;
     private BluetoothAdapter bluetoothAdapter;
 
     private TextView xTextView;
     private TextView yTextView;
     private TextView zTextView;
+
+    private TextView xMagTextView;
+    private TextView yMagTextView;
+    private TextView zMagTextView;
 
     private ServerThread thread;
     private WorkerThread worker;
@@ -64,6 +69,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Frame[] frames;
     private Frame averagedFrame;
     private int currentFrame = 0;
+    private boolean updatedAccelerometer = false;
+    private boolean updatedMagnetometer = false;
 
     private enum State {
         WaitForClient,
@@ -109,11 +116,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         xTextView = (TextView)findViewById(R.id.x_text_view);
         yTextView = (TextView)findViewById(R.id.y_text_view);
         zTextView = (TextView)findViewById(R.id.z_text_view);
+        xMagTextView = (TextView)findViewById(R.id.x_mag_text_view);
+        yMagTextView = (TextView)findViewById(R.id.y_mag_text_view);
+        zMagTextView = (TextView)findViewById(R.id.z_mag_text_view);
 
         // Sensors initialization
         sensorManager = (SensorManager) getSystemService(getApplicationContext().SENSOR_SERVICE);
         sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        sensorManager.registerListener(this, sensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorMagnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        sensorManager.registerListener(this, sensorAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+        sensorManager.registerListener(this, sensorMagnetometer, SensorManager.SENSOR_DELAY_FASTEST);
 
         // Setup timer
         quasiTimer = new Handler();
@@ -203,9 +215,32 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             float range = mySensor.getMaximumRange();
             frames[currentFrame].setAccelerometer((byte)(x/range*127), (byte)(y/range*127), (byte)(z/range*127));
 
+            updatedAccelerometer = true;
+        }
+
+        if (mySensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+            float x = event.values[0];
+            float y = event.values[1];
+            float z = event.values[2];
+
+            xMagTextView.setText(Float.toString(x));
+            yMagTextView.setText(Float.toString(y));
+            zMagTextView.setText(Float.toString(z));
+
+            float range = mySensor.getMaximumRange();
+            frames[currentFrame].setMagnetometer((byte)(x/range*127), (byte)(y/range*127), (byte)(z/range*127));
+
+            updatedMagnetometer = true;
+        }
+
+        if (updatedAccelerometer == true && updatedMagnetometer == true)
+        {
             currentFrame++;
             if (currentFrame >= averageSamplesAmount)
                 currentFrame = 0;
+
+            updatedAccelerometer = false;
+            updatedMagnetometer = false;
         }
     }
 
@@ -213,19 +248,29 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         int aX = 0;
         int aY = 0;
         int aZ = 0;
+        int mX = 0;
+        int mY = 0;
+        int mZ = 0;
 
         for(int i = 0; i < averageSamplesAmount; i++)
         {
             aX += frames[i].getAccelerometerX();
             aY += frames[i].getAccelerometerY();
             aZ += frames[i].getAccelerometerZ();
+            mX += frames[i].getMagnetometerX();
+            mY += frames[i].getMagnetometerY();
+            mZ += frames[i].getMagnetometerZ();
         }
 
         aX = aX / averageSamplesAmount;
         aY = aY / averageSamplesAmount;
         aZ = aZ / averageSamplesAmount;
+        mX = mX / averageSamplesAmount;
+        mY = mY / averageSamplesAmount;
+        mZ = mZ / averageSamplesAmount;
 
         averagedFrame.setAccelerometer((byte)aX, (byte)aY, (byte)aZ);
+        averagedFrame.setMagnetometer((byte)mX, (byte)mY, (byte)mZ);
     }
 
     public void setWorker(WorkerThread thread)
