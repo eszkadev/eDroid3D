@@ -295,7 +295,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     updateSamplesPerSecond(20);
                     break;
                 case 'e':
-                    updateSamplesPerSecond(100);
+                    updateSamplesPerSecond(10);
                     break;
 
                 default:
