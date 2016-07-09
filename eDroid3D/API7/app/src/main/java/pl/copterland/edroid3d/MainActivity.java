@@ -31,6 +31,7 @@ package pl.copterland.edroid3d;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -57,6 +58,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private ServerThread thread;
     private WorkerThread worker;
 
+    private Handler quasiTimer;
+
     private final static int FRAMES_MAX_SIZE = 128;
     private Frame[] frames;
     private Frame averagedFrame;
@@ -70,6 +73,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private State state;
     private int averageSamplesAmount;
+    private int samplesPerSecond;
+
+    private final Runnable sendDataTask = new Runnable() {
+        @Override
+        public void run() {
+            if (worker != null && state == State.Running) {
+                averageFrame();
+                averagedFrame.setFrameNumber((byte)((int)averagedFrame.getFrameNumber() + 1));
+                worker.write(averagedFrame.getData());
+            }
+            quasiTimer.postDelayed(this, 1000/samplesPerSecond);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +96,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         state = State.WaitForClient;
         averageSamplesAmount = 2;
+        samplesPerSecond = 10;
 
         frames = new Frame[FRAMES_MAX_SIZE];
         for(int i = 0; i < FRAMES_MAX_SIZE; i++)
@@ -97,6 +114,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         sensorManager = (SensorManager) getSystemService(getApplicationContext().SENSOR_SERVICE);
         sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sensorManager.registerListener(this, sensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+
+        // Setup timer
+        quasiTimer = new Handler();
+        quasiTimer.postDelayed(sendDataTask, 1000/samplesPerSecond);
 
         // Bluetooth initialization
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -185,12 +206,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             currentFrame++;
             if (currentFrame >= averageSamplesAmount)
                 currentFrame = 0;
-
-            if (worker != null && state == State.Running) {
-                averageFrame();
-                averagedFrame.setFrameNumber((byte)((int)averagedFrame.getFrameNumber() + 1));
-                worker.write(averagedFrame.getData());
-            }
         }
     }
 
@@ -230,6 +245,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     }
 
+    private void updateSamplesPerSecond(int samples)
+    {
+        samplesPerSecond = samples;
+        updateStatus("Samples per second: " + samplesPerSecond);
+    }
+
     public void updateStatus(String message)
     {
         Snackbar.make(findViewById(R.id.main_view), message, Snackbar.LENGTH_LONG)
@@ -259,6 +280,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 case '7':
                     averageSamplesAmount = (int)java.lang.Math.pow(2, (c - '0'));
                     updateStatus("Averaged samples: " + averageSamplesAmount);
+                    break;
+
+                case 'a':
+                    updateSamplesPerSecond(100);
+                    break;
+                case 'b':
+                    updateSamplesPerSecond(50);
+                    break;
+                case 'c':
+                    updateSamplesPerSecond(25);
+                    break;
+                case 'd':
+                    updateSamplesPerSecond(20);
+                    break;
+                case 'e':
+                    updateSamplesPerSecond(100);
                     break;
 
                 default:
