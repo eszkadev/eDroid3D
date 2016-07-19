@@ -30,6 +30,7 @@ package pl.copterland.edroid3d;
 
 public class Frame {
     public static final int FRAME_SIZE = 27;
+    private static final int MAGIC_NUMBER = 2048;
     private byte[] data;
 
     public Frame()
@@ -64,11 +65,18 @@ public class Frame {
         data[Offset.PALM_Z] = z;
     }
 
-    public void setMagnetometer(byte x, byte y, byte z)
+    public void setMagnetometer(int x, int y, int z)
     {
-        data[Offset.MAGNETOMETER_X] = x;
-        data[Offset.MAGNETOMETER_Y] = y;
-        data[Offset.MAGNETOMETER_Z] = z;
+        x += MAGIC_NUMBER;
+        y += MAGIC_NUMBER;
+        z += MAGIC_NUMBER;
+
+        data[Offset.MAGNETOMETER_X] = (byte)x;
+        data[Offset.MAGNETOMETER_X + 1] = (byte)(x >> 8);
+        data[Offset.MAGNETOMETER_Y] = (byte)y;
+        data[Offset.MAGNETOMETER_Y + 1] = (byte)(y >> 8);
+        data[Offset.MAGNETOMETER_Z] = (byte)z;
+        data[Offset.MAGNETOMETER_Z + 1] = (byte)(z >> 8);
     }
 
     public byte getAccelerometerX()

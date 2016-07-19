@@ -197,6 +197,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onResume() {
         super.onResume();
         sensorManager.registerListener(this, sensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+
     }
 
     @Override
@@ -228,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             zMagTextView.setText(Float.toString(z));
 
             float range = mySensor.getMaximumRange();
-            frames[currentFrame].setMagnetometer((byte)(x/range*127), (byte)(y/range*127), (byte)(z/range*127));
+            frames[currentFrame].setMagnetometer((int)(x/range*127), (int)(y/range*127), (int)(z/range*127));
 
             updatedMagnetometer = true;
         }
