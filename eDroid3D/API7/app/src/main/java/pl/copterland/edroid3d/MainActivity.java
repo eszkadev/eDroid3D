@@ -229,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             zMagTextView.setText(Float.toString(z));
 
             float range = mySensor.getMaximumRange();
-            frames[currentFrame].setMagnetometer((int)(x/range*127), (int)(y/range*127), (int)(z/range*127));
+            averagedFrame.setMagnetometer((int)(x/range*127), (int)(y/range*127), (int)(z/range*127));
 
             updatedMagnetometer = true;
         }
@@ -249,29 +249,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         int aX = 0;
         int aY = 0;
         int aZ = 0;
-        int mX = 0;
-        int mY = 0;
-        int mZ = 0;
 
         for(int i = 0; i < averageSamplesAmount; i++)
         {
             aX += frames[i].getAccelerometerX();
             aY += frames[i].getAccelerometerY();
             aZ += frames[i].getAccelerometerZ();
-            mX += frames[i].getMagnetometerX();
-            mY += frames[i].getMagnetometerY();
-            mZ += frames[i].getMagnetometerZ();
         }
 
         aX = aX / averageSamplesAmount;
         aY = aY / averageSamplesAmount;
         aZ = aZ / averageSamplesAmount;
-        mX = mX / averageSamplesAmount;
-        mY = mY / averageSamplesAmount;
-        mZ = mZ / averageSamplesAmount;
 
         averagedFrame.setAccelerometer((byte)aX, (byte)aY, (byte)aZ);
-        averagedFrame.setMagnetometer((byte)mX, (byte)mY, (byte)mZ);
     }
 
     public void setWorker(WorkerThread thread)
