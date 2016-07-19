@@ -82,6 +82,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private int averageSamplesAmount;
     private int samplesPerSecond;
 
+    private float maxAccelerometer = 0;
+    private float maxMagnetometer = 0;
+
     private final Runnable sendDataTask = new Runnable() {
         @Override
         public void run() {
@@ -208,13 +211,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             float x = event.values[0];
             float y = event.values[1];
             float z = event.values[2];
+
+            if (maxAccelerometer < x)
+                maxAccelerometer = x;
+            if (maxAccelerometer < y)
+                maxAccelerometer = y;
+            if (maxAccelerometer < z)
+                maxAccelerometer = z;
             
             xTextView.setText(Float.toString(x));
             yTextView.setText(Float.toString(y));
             zTextView.setText(Float.toString(z));
 
-            float range = mySensor.getMaximumRange();
-            frames[currentFrame].setAccelerometer((byte)(x/range*127), (byte)(y/range*127), (byte)(z/range*127));
+            frames[currentFrame].setAccelerometer((byte)(x/maxAccelerometer*127), (byte)(y/maxAccelerometer*127), (byte)(z/maxAccelerometer*127));
 
             updatedAccelerometer = true;
         }
@@ -224,12 +233,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             float y = event.values[1];
             float z = event.values[2];
 
+            if (maxMagnetometer < x)
+                maxMagnetometer = x;
+            if (maxMagnetometer < y)
+                maxMagnetometer = y;
+            if (maxMagnetometer < z)
+                maxMagnetometer = z;
+
             xMagTextView.setText(Float.toString(x));
             yMagTextView.setText(Float.toString(y));
             zMagTextView.setText(Float.toString(z));
 
-            float range = mySensor.getMaximumRange();
-            averagedFrame.setMagnetometer((int)(x/range*127), (int)(y/range*127), (int)(z/range*127));
+            averagedFrame.setMagnetometer((int)(x/maxMagnetometer*127), (int)(y/maxMagnetometer*127), (int)(z/maxMagnetometer*127));
 
             updatedMagnetometer = true;
         }
